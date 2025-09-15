@@ -3,45 +3,54 @@ package com.kcbiswash.coursesassignment2
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.kcbiswash.coursesassignment2.data.model.Course
+import com.kcbiswash.coursesassignment2.ui.dashboard.DashboardScreen
+import com.kcbiswash.coursesassignment2.ui.details.DetailsScreen
+import com.kcbiswash.coursesassignment2.ui.login.LoginScreen
 import com.kcbiswash.coursesassignment2.ui.theme.Coursesassignment2Theme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             Coursesassignment2Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Coursesassignment2Theme {
-        Greeting("Android")
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen(onSuccess = { keypass ->
+                navController.navigate("dashboard/$keypass")
+            })
+        }
+        composable(
+            route = "dashboard/{keypass}",
+            arguments = listOf(navArgument("keypass") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val keypass = backStackEntry.arguments?.getString("keypass").orEmpty()
+            DashboardScreen(keypass = keypass, onCourseSelected = { course ->
+                navController.currentBackStackEntry?.savedStateHandle?.set("course", course)
+                navController.navigate("details")
+            })
+        }
+        composable("details") {
+            val course = navController.previousBackStackEntry?.savedStateHandle?.get<Course>("course")
+            course?.let { DetailsScreen(it) }
+        }
     }
 }

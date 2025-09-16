@@ -1,5 +1,9 @@
 @file:Suppress("DSL_SCOPE_VIOLATION")
 
+import org.gradle.accessors.dm.LibrariesForLibs
+
+val libs = the<LibrariesForLibs>()
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)

@@ -1,7 +1,7 @@
-package com.kcbiswash.coursesassignment2
+package com.kcbiswash.nit3213
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class CoursesApplication : Application()
+class App : Application()
